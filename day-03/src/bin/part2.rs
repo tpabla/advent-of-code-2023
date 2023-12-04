@@ -14,50 +14,33 @@ fn is_symbol(character: char) -> bool {
 fn sum_numbers(input_string: String) -> u32 {
     let mut gear_map: HashMap<String, Vec<u32>> = Default::default();
 
-    for (i, row) in input_string.lines().into_iter().enumerate() {
-        let mut prev_line = ".".repeat(row.len());
-        if i > 0 {
-            prev_line = input_string.lines().nth(i-1).unwrap_or(&prev_line).to_string();
-        }
-        let next_line = input_string.lines().nth(i+1).unwrap_or(&(".".repeat(row.len()))).to_string();
+    let lines: Vec<&str> = input_string.lines().collect();
 
+    for (i, row) in lines.iter().enumerate() {
         let mut curr_num = "".to_string();
         let mut gear_coords: HashSet<(usize,usize)> = HashSet::new();
 
 
         for (j, character) in row.chars().enumerate() {
             if character.is_numeric(){
-                if curr_num.is_empty() {
-                    //find all things to the left
-                    if j > 0 {
-                        if is_symbol(row.chars().nth(j-1).unwrap_or('.')) {
-                            gear_coords.insert((i, j-1));
-                        }
-                        if is_symbol(prev_line.chars().nth(j-1).unwrap_or('.')) {
-                            gear_coords.insert((i-1, j-1));
-                        }
 
-                        if is_symbol(next_line.chars().nth(j-1).unwrap_or('.')) {
-                            gear_coords.insert((i+1, j-1));
+                let positions = [
+                    (-1,-1),
+                    (0,-1),
+                    (1,-1),
+                    (1, 0),
+                    (-1, 0),
+                    (1, 1),
+                    (-1, 1),
+                    (0, 1),
+                ];
+                for (row_mod, col_mod) in positions {
+                    let (r, c) = (row_mod + i as i32, col_mod + j as i32);
+                    if r >= 0 && r < lines.len() as i32 && c >= 0 {
+                        let char = lines[r as usize].chars().nth(c as usize).unwrap_or('.');
+                        if is_symbol(char) {
+                            gear_coords.insert((r as usize, c as usize));
                         }
-
-                    }
-                }
-                if is_symbol(prev_line.chars().nth(j).unwrap_or('.')) {
-                    gear_coords.insert((i-1, j));
-                }
-                if is_symbol(next_line.chars().nth(j).unwrap_or('.')) {
-                    gear_coords.insert((i+1, j));
-                }
-                if !row.chars().nth(j+1).unwrap_or('.').is_numeric() {
-                    if is_symbol(row.chars().nth(j+1).unwrap_or('.')) {
-                        gear_coords.insert((i, j+1));
-                    }
-                    if is_symbol(prev_line.chars().nth(j+1).unwrap_or('.')) {
-                        gear_coords.insert((i-1, j+1));
-                    }
-                    if is_symbol(next_line.chars().nth(j+1).unwrap_or('.')) {
-                        gear_coords.insert((i+1, j+1));
                     }
                 }
                 curr_num.push(character);
@@ -83,7 +66,6 @@ fn sum_numbers(input_string: String) -> u32 {
             }
         }
     }
-
     let mut product_output: Vec<u32> = Vec::new();
     for (_coord, nums) in gear_map.iter() {
         if nums.len() == 2 {
