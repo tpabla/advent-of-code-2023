@@ -20,20 +20,21 @@ struct RangeMap {
 struct FromToMap {
     source_type: String,
     destination_type: String,
-    ranges: Vec<RangeMap>
+    ranges: Vec<RangeMap>,
 }
 
 impl FromToMap {
     fn parse_map(input_string: String) -> FromToMap {
         let mut parts = input_string.split('\n');
         let (source_type, destination_type) = {
-            let parts: Vec<&str> = parts.next()
-                 .expect("a valid map name")
-                 .trim_end_matches("map:")
-                 .trim()
-                 .split('-')
-                 .filter(|&s| s != "to")
-                 .collect();
+            let parts: Vec<&str> = parts
+                .next()
+                .expect("a valid map name")
+                .trim_end_matches("map:")
+                .trim()
+                .split('-')
+                .filter(|&s| s != "to")
+                .collect();
             if parts.len() == 2 {
                 (parts[0], parts[1])
             } else {
@@ -41,21 +42,24 @@ impl FromToMap {
             }
         };
 
-        let ranges: Vec<RangeMap> = parts.map(|s| {
-            let values: Vec<_> = s.trim()
-                          .split_whitespace()
-                          .map(|s| s.parse::<i64>().expect("a valid number"))
-                          .collect();
-            if values.len() == 3 {
-                RangeMap {
-                    destination_range_start: values[0],
-                    source_range_start: values[1],
-                    range: values[2]
+        let ranges: Vec<RangeMap> = parts
+            .map(|s| {
+                let values: Vec<_> = s
+                    .trim()
+                    .split_whitespace()
+                    .map(|s| s.parse::<i64>().expect("a valid number"))
+                    .collect();
+                if values.len() == 3 {
+                    RangeMap {
+                        destination_range_start: values[0],
+                        source_range_start: values[1],
+                        range: values[2],
+                    }
+                } else {
+                    panic!("Invalid Input")
                 }
-            } else {
-                panic!("Invalid Input")
-            }
-        }).collect();
+            })
+            .collect();
         FromToMap {
             source_type: source_type.to_string(),
             destination_type: destination_type.to_string(),
@@ -67,43 +71,43 @@ impl FromToMap {
         match self.ranges.iter().find(|range| {
             range.source_range_start <= seed && seed <= range.source_range_start + range.range
         }) {
-            None => {
-                seed
-            }
-            Some(range) => {
-                seed - range.source_range_start + range.destination_range_start
-            }
+            None => seed,
+            Some(range) => seed - range.source_range_start + range.destination_range_start,
         }
     }
 }
 
 fn process(input_string: String) -> i64 {
     let mut parts = input_string.split("\n\n");
-    let seeds: Vec<i64> = parts.next()
-                               .expect("Valid seed list")
-                               .trim_start_matches("seeds:")
-                               .split_whitespace()
-                               .map(|s| s.parse::<i64>().expect("a valid number"))
-                               .collect();
-    let seed_ranges: Vec<_> = seeds.chunks(2).map(|chunk| {
-        Range {
+    let seeds: Vec<i64> = parts
+        .next()
+        .expect("Valid seed list")
+        .trim_start_matches("seeds:")
+        .split_whitespace()
+        .map(|s| s.parse::<i64>().expect("a valid number"))
+        .collect();
+    let seed_ranges: Vec<_> = seeds
+        .chunks(2)
+        .map(|chunk| Range {
             start: chunk[0],
-            end: chunk[0] + chunk[1]
-        }
-    }).collect();
+            end: chunk[0] + chunk[1],
+        })
+        .collect();
 
     let maps: Vec<_> = parts.map(|s| s.trim()).collect();
-    let maps: Vec<_> = maps.iter().map(|map| {
-        FromToMap::parse_map(map.to_string())
-    }).collect();
+    let maps: Vec<_> = maps
+        .iter()
+        .map(|map| FromToMap::parse_map(map.to_string()))
+        .collect();
 
-    let start_locations: Vec<i64> = seed_ranges.iter()
-                                         .flat_map(|range| range.clone().into_iter())
-                                         .collect();
-    let min_location: Option<i64> = start_locations.into_iter()
-        .progress().map(|seed| {
-             maps.iter().fold(seed, |seed, map| map.get_destination(seed))
-        }).min();
+    let min_location: Option<i64> = seed_ranges
+        .iter()
+        .flat_map(|range| range.clone().into_iter())
+        .map(|seed| {
+            maps.iter()
+                .fold(seed, |seed, map| map.get_destination(seed))
+        })
+        .min();
     min_location.expect("a number")
 }
 
@@ -111,11 +115,9 @@ fn process(input_string: String) -> i64 {
 mod tests {
     use super::*;
 
-
     #[test]
     fn it_works() {
         let input = include_str!("../../examples/example_input.txt");
         assert_eq!(process(input.to_string()), 46);
     }
-
 }
