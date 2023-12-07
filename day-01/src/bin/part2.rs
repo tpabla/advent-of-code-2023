@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 fn main() {
-
     let input = include_str!("../../examples/input1.txt");
 
     let sum: u32 = input.lines().map(|line| process(line.to_string())).sum();
@@ -11,26 +10,29 @@ fn main() {
 
 fn reset_curr_word(num_map: &HashMap<&str, u32>, word: String) -> String {
     let mut word = word;
-    while word.len() > 0 && num_map.keys().find(|key_string| key_string.starts_with(&word)) == None {
+    while word.len() > 0
+        && num_map
+            .keys()
+            .find(|key_string| key_string.starts_with(&word))
+            == None
+    {
         word.remove(0);
     }
     word
 }
 
 fn process(line: String) -> u32 {
-    let num_map = HashMap::from(
-        [
-            ("one", 1),
-            ("two", 2),
-            ("three", 3),
-            ("four", 4),
-            ("five", 5),
-            ("six", 6),
-            ("seven", 7),
-            ("eight", 8),
-            ("nine", 9),
-        ]
-    );
+    let num_map = HashMap::from([
+        ("one", 1),
+        ("two", 2),
+        ("three", 3),
+        ("four", 4),
+        ("five", 5),
+        ("six", 6),
+        ("seven", 7),
+        ("eight", 8),
+        ("nine", 9),
+    ]);
 
     let mut left_num: Option<u32> = None;
     let mut right_num: Option<u32> = None;
@@ -49,13 +51,16 @@ fn process(line: String) -> u32 {
 
         match num_map.get(curr_word.as_str()) {
             None => {
-                match num_map.keys().find(|key_string| key_string.starts_with(&curr_word)) {
+                match num_map
+                    .keys()
+                    .find(|key_string| key_string.starts_with(&curr_word))
+                {
                     None => {
                         curr_word = reset_curr_word(&num_map, curr_word);
-                    },
-                    _ => ()
+                    }
+                    _ => (),
                 }
-            },
+            }
             Some(x) => {
                 if left_num == None {
                     left_num = Some(*x);
@@ -66,9 +71,8 @@ fn process(line: String) -> u32 {
         }
     }
 
-    return left_num.unwrap_or(0) * 10 + right_num.unwrap_or(0)
+    return left_num.unwrap_or(0) * 10 + right_num.unwrap_or(0);
 }
-
 
 #[cfg(test)]
 mod tests {
@@ -96,7 +100,10 @@ mod tests {
 
     #[test]
     fn it_works_with_more_complex_string() {
-        assert_eq!(process("dcnhlcqzhthreebhrnfgjbfive1threetwo53".to_string()), 33)
+        assert_eq!(
+            process("dcnhlcqzhthreebhrnfgjbfive1threetwo53".to_string()),
+            33
+        )
     }
 
     #[test]
