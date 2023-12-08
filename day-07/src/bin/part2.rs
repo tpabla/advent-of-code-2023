@@ -130,15 +130,15 @@ fn process(input_string: String) -> u32 {
     });
 
 
-    hands
-        .clone()
-        .into_iter()
+    let x: u32 = hands
+        .iter()
         .enumerate()
         .map(|(index, hand)| {
             let rank = hands.len() - index;
-            hand.bid * rank as u32
+            (hand.bid * rank as u32) as u32
         })
-        .sum()
+        .sum();
+    x
 }
 
 #[cfg(test)]
