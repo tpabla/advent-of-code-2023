@@ -1,4 +1,4 @@
-use std::{collections::HashMap, io::Write};
+use std::{collections::HashMap};
 
 fn main() {
     let input_string = include_str!("../../examples/puzzle_input.txt").to_string();
@@ -14,7 +14,7 @@ struct Node {
     right: String
 }
 
-fn process(input_string: String) -> u32 {
+fn process(input_string: String) -> u64 {
     let mut parts = input_string.split("\n\n");
     let directions = parts.next().expect("a valid string");
     let camel_map = parts.next().expect("a valid string");
@@ -54,37 +54,37 @@ fn process(input_string: String) -> u32 {
         .filter(|node| node.current.ends_with("A"))
         .map(|s| s.current.to_string()).collect();
 
-    let mut count: u32 = 0;
+    curr_nodes.sort();
     dbg!(curr_nodes.clone());
-    loop {
-        for direction in directions.chars() {
-            let mut updated_nodes: Vec<String> = Default::default();
-            let mut finished_nodes: Vec<bool> = Default::default();
-            for curr_node in &curr_nodes{
+
+    let mut path_count: Vec<u64> = curr_nodes.clone().iter().map( |curr_node| {
+        let mut count =00;
+        let mut node = curr_node.clone();
+        while !node.ends_with('Z') {
+            for direction in directions.chars() {
+                count += 1;
                 match direction {
                     'R' => {
-                        updated_nodes.push(map_hash.get(curr_node).expect("a valid node").right.clone());
+                        node = map_hash.get(&node).expect("a valid node").right.clone();
 
                     },
                     'L' => {
-                        updated_nodes.push(map_hash.get(curr_node).expect("a valid node").left.clone())
+                        node = map_hash.get(&node).expect("a valid node").left.clone();
                     },
                     _ => {
                         panic!("Invalid direction");
                     }
                 }
-                if curr_node.ends_with('Z') {
-                    finished_nodes.push(true);
-                }
-                // println!("{}", curr_node.clone());
             }
-            curr_nodes = updated_nodes.clone();
-            if finished_nodes.len() == curr_nodes.len() {
-                return count
-            }
-            count += 1;
         }
-    }
+        count
+    }).collect();
+    path_count.sort();
+    dbg!(path_count.clone());
+
+    let output: u64 = path_count.into_iter().fold(1, num_integer::lcm);
+    output
+
 }
 
 
